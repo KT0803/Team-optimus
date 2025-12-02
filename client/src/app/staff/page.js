@@ -4,6 +4,10 @@ import api from '../../utils/api';
 import { Scan, CheckCircle, XCircle, Package, User } from 'lucide-react';
 
 export default function Staff() {
+    const [qrCode, setQrCode] = useState('');
+    const [result, setResult] = useState(null);
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
      return (
         <div style={{ padding: '40px 20px' }}>
             <div style={{ marginBottom: '40px' }}>
