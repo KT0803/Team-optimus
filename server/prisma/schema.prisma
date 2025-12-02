@@ -1,0 +1,188 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model to store user information
+model User {
+  id          Int      @id @default(autoincrement())
+  name        String
+  email       String   @unique
+  password    String
+  phone       String   @unique
+  role        Role     @default(STUDENT)
+  orders      Order[]
+  subscriptions Subscription[]
+  createdAt   DateTime @default(now())
+  feedback    Feedback[]
+  rewards     Reward[]
+  notifications Notification[]
+  rewardPoints Int     @default(0)
+}
+
+// ROles for different types of users
+enum Role {
+  STUDENT
+  ADMIN
+  STAFF
+}
+
+// To store menu items
+model MenuItem {
+  id             Int      @id @default(autoincrement())
+  name           String
+  category       String
+  preparationTime String?
+  price          Float
+  quantity       Int?     @default(100)
+  isAvailable    Boolean  @default(true)
+  outletId       Int?
+  outlet         Outlet?  @relation(fields: [outletId], references: [id])
+  createdAt      DateTime @default(now())
+  orderItems     OrderItem[]
+}
+
+// Outlets (e.g., Darshani, Fuel Up)
+model Outlet {
+  id        Int        @id @default(autoincrement())
+  name      String
+  location  String?
+  menuItems MenuItem[]
+}
+
+// orders placed by user 
+model Order {
+  id            Int         @id @default(autoincrement())
+  userId        Int
+  user          User        @relation(fields: [userId], references: [id])
+  totalAmount   Float
+  status        String      @default("Pending") // Pending, Completed, Cancelled
+  paymentStatus String      @default("Unpaid")
+  qrCode        String?     // Can be linked to QRValidation if needed, or just a string
+  createdAt     DateTime    @default(now())
+  orderItems    OrderItem[]
+  payments      Payment[]
+}
+
+// Items in each order
+model OrderItem {
+  id        Int       @id @default(autoincrement())
+  orderId   Int
+  menuItemId Int
+  quantity  Int
+  order     Order     @relation(fields: [orderId], references: [id])
+  menuItem  MenuItem  @relation(fields: [menuItemId], references: [id])
+}
+
+// Subscription model for meal plans
+model Subscription {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  planType  String   // Weekly, Monthly
+  mealType  MealType
+  validFrom DateTime
+  validTo   DateTime
+  qrCode    String?
+  isActive  Boolean  @default(true)
+}
+
+// Meal types for subscriptions
+enum MealType {
+  BREAKFAST
+  LUNCH
+  SNACKS
+  DINNER
+}
+
+// Payments
+model Payment {
+  id        Int      @id @default(autoincrement())
+  orderId   Int
+  order     Order    @relation(fields: [orderId], references: [id])
+  amount    Float
+  method    String   // UPI, Card, Cash
+  status    String   // Success, Failed, Pending
+  timestamp DateTime @default(now())
+}
+
+// QR Validation (Optional separate table if we want to track individual QR lifecycle strictly)
+model QRValidation {
+  id         Int      @id @default(autoincrement())
+  code       String   @unique
+  isUsed     Boolean  @default(false)
+  validUntil DateTime
+  type       String   // ORDER, SUBSCRIPTION
+  referenceId Int     // ID of the Order or Subscription
+}
+
+// Feedback Model
+model Feedback {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  rating    Int      // 1-5
+  comment   String?
+  createdAt DateTime @default(now())
+}
+
+// Reward Model
+model Reward {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+  points      Int
+  type        RewardType // EARNED, REDEEMED
+  description String?
+  createdAt   DateTime @default(now())
+}
+
+enum RewardType {
+  EARNED
+  REDEEMED
+}
+
+// Day of Week enum for weekly menu
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+// Weekly Menu Model
+model WeeklyMenu {
+  id        Int       @id @default(autoincrement())
+  day       DayOfWeek
+  mealType  MealType
+  items     String    // Comma-separated list of menu items
+  weekDate  DateTime? // Optional: Date of Monday of that week, for historical tracking
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@unique([day, mealType, weekDate])
+}
+
+// Notification Model
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
