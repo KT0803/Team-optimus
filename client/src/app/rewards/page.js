@@ -4,11 +4,9 @@ import api from '../../utils/api';
 import { Gift, Award, History, Coffee, Pizza, IceCream } from 'lucide-react';
 
 export default function Rewards() {
-
-        const [balance, setBalance] = useState(0);
+    const [balance, setBalance] = useState(0);
     const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(true);
-
     const redeemableItems = [
         { id: 1, name: "Free Coffee", points: 50, icon: <Coffee size={24} /> },
         { id: 2, name: "Ice Cream Scoop", points: 100, icon: <IceCream size={24} /> },
