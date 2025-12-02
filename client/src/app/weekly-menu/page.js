@@ -107,7 +107,7 @@ export default function WeeklyMenu() {
         }
     };
 
-        return (
+    return (
         <div style={{ maxWidth: '1000px', margin: '40px auto', padding: '0 20px' }}>
             <div style={{ textAlign: 'center', marginBottom: '40px' }}>
                 <h1 style={{
@@ -124,11 +124,117 @@ export default function WeeklyMenu() {
                 <p style={{ color: 'var(--gray-dark)', fontSize: '1.1rem' }}>
                     Plan your meals for the week ahead
                 </p>
+                {error && (
+                    <div style={{
+                        marginTop: '15px',
+                        padding: '12px 20px',
+                        background: 'rgba(255, 118, 117, 0.1)',
+                        border: '1px solid rgba(255, 118, 117, 0.3)',
+                        borderRadius: '8px',
+                        color: 'var(--danger)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px'
+                    }}>
+                        <AlertCircle size={18} />
+                        <span>Using offline menu (Server connection failed)</span>
+                    </div>
+                )}
+            </div>
 
-                <div style={{ marginTop: '40px', textAlign: 'center', color: 'var(--gray-dark)', fontSize: '0.9rem' }}>
+            {loading ? (
+                <div style={{
+                    textAlign: 'center',
+                    padding: '60px 20px',
+                    color: 'var(--gray-dark)'
+                }}>
+                    <div style={{
+                        width: '50px',
+                        height: '50px',
+                        border: '4px solid var(--light)',
+                        borderTop: '4px solid var(--primary)',
+                        borderRadius: '50%',
+                        margin: '0 auto 20px',
+                        animation: 'spin 1s linear infinite'
+                    }}></div>
+                    <p>Loading weekly menu...</p>
+                    <style jsx>{`
+                        @keyframes spin {
+                            0% { transform: rotate(0deg); }
+                            100% { transform: rotate(360deg); }
+                        }
+                    `}</style>
+                </div>
+            ) : (
+                <>
+                    {/* Day Tabs */}
+                    <div style={{
+                        display: 'flex',
+                        overflowX: 'auto',
+                        gap: '10px',
+                        padding: '5px',
+                        marginBottom: '30px',
+                        scrollbarWidth: 'none'
+                    }}>
+                        {days.map(day => (
+                            <button
+                                key={day}
+                                onClick={() => setActiveDay(day)}
+                                className={`btn ${activeDay === day ? 'btn-primary' : 'btn-outline'}`}
+                                style={{
+                                    borderRadius: '20px',
+                                    padding: '10px 20px',
+                                    whiteSpace: 'nowrap',
+                                    flexShrink: 0
+                                }}
+                            >
+                                {day}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Schedule Grid */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
+                        {mealTypes.map((meal) => (
+                            <div key={meal.name} className="card glass" style={{ transition: 'transform 0.2s' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px' }}>
+                                    <div style={{
+                                        padding: '8px',
+                                        borderRadius: '8px',
+                                        background: 'rgba(108, 92, 231, 0.1)',
+                                        color: 'var(--primary)'
+                                    }}>
+                                        {meal.icon}
+                                    </div>
+                                    <div>
+                                        <h3 style={{ fontSize: '1.2rem', fontWeight: '700' }}>{meal.name}</h3>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.85rem', color: 'var(--gray-dark)' }}>
+                                            <Clock size={14} /> {meal.time}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style={{
+                                    padding: '15px',
+                                    background: 'rgba(255,255,255,0.5)',
+                                    borderRadius: '12px',
+                                    minHeight: '80px',
+                                    display: 'flex',
+                                    alignItems: 'center'
+                                }}>
+                                    <p style={{ fontSize: '1rem', color: 'var(--dark)', lineHeight: '1.5' }}>
+                                        {weeklySchedule[activeDay][meal.name]}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </>
+            )}
+
+            <div style={{ marginTop: '40px', textAlign: 'center', color: 'var(--gray-dark)', fontSize: '0.9rem' }}>
                 <p>* Menu is subject to change based on availability of ingredients.</p>
             </div>
-        </div>
         </div>
     );
 }
