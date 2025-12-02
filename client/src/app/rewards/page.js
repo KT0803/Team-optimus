@@ -4,6 +4,8 @@ import api from '../../utils/api';
 import { Gift, Award, History, Coffee, Pizza, IceCream } from 'lucide-react';
 
 export default function Rewards() {
+
+    
     return (
         <div style={{ padding: '40px 20px', maxWidth: '1000px', margin: '0 auto' }}>
             {/* Header */}
