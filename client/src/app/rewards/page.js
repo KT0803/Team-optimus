@@ -5,7 +5,54 @@ import { Gift, Award, History, Coffee, Pizza, IceCream } from 'lucide-react';
 
 export default function Rewards() {
 
-    
+        const [balance, setBalance] = useState(0);
+    const [history, setHistory] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    const redeemableItems = [
+        { id: 1, name: "Free Coffee", points: 50, icon: <Coffee size={24} /> },
+        { id: 2, name: "Ice Cream Scoop", points: 100, icon: <IceCream size={24} /> },
+        { id: 3, name: "Extra Snack", points: 150, icon: <Pizza size={24} /> },
+    ];
+
+    const fetchRewards = async () => {
+        try {
+            const res = await api.get('/rewards');
+            setBalance(res.data.balance);
+            setHistory(res.data.history);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchRewards();
+    }, []);
+
+    const handleRedeem = async (item) => {
+        if (balance < item.points) {
+            alert("Insufficient points!");
+            return;
+        }
+
+        if (!confirm(`Redeem ${item.name} for ${item.points} points?`)) return;
+
+        try {
+            await api.post('/rewards/redeem', {
+                points: item.points,
+                description: `Redeemed: ${item.name}`
+            });
+            alert("Redeemed successfully! Show this to the counter staff.");
+            fetchRewards(); // Refresh balance
+        } catch (err) {
+            alert(err.response?.data?.message || "Redemption failed");
+        }
+    };
+
+    if (loading) return <div className="p-8 text-center">Loading rewards...</div>;
+
     return (
         <div style={{ padding: '40px 20px', maxWidth: '1000px', margin: '0 auto' }}>
             {/* Header */}
