@@ -8,6 +8,23 @@ export default function Staff() {
     const [result, setResult] = useState(null);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+
+     const handleScan = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            const res = await api.post('/qr/validate', { qrCode });
+            setResult(res.data);
+            setError('');
+            setQrCode('');
+        } catch (err) {
+            setError(err.response?.data?.message || 'Validation failed');
+            setResult(null);
+        } finally {
+            setLoading(false);
+        }
+    };
+
      return (
         <div style={{ padding: '40px 20px' }}>
             <div style={{ marginBottom: '40px' }}>
